@@ -15,7 +15,7 @@ Open PowerShell and run (from the repository root):
 
 ```powershell
 cd C:\Users\nanem\UDP-TCP_Chat_App_with_Java_sockets
-javac UDPServer.java Main.java
+javac UDPServer.java UDPClient.java Main.java
 ```
 
 This produces `.class` files that you can run with the `java` command.
@@ -73,6 +73,37 @@ Notes:
 	will be truncated.
 - The server runs single-threaded and blocks inside the receive loop. For production use you may
 	want to add threading, graceful shutdown hooks, or more robust logging.
+
+## UDPClient
+
+A simple `UDPClient` implementation is provided in `UDPClient.java`. It reads lines from standard
+input (UTF-8) and sends each line as a UDP datagram to the host and port you provide as
+command-line arguments.
+
+Usage (interactive):
+
+```powershell
+java UDPClient <host> <port>
+# Example:
+java UDPClient localhost 9876
+```
+
+Type lines and press Enter to send each one. To exit:
+- On Windows PowerShell: press Ctrl+Z then Enter to signal EOF.
+- On Linux/macOS: press Ctrl+D.
+
+Send a single message non-interactively (piped):
+
+```powershell
+"Hello from UDPClient" | java UDPClient localhost 9876
+```
+
+Notes about the client:
+- The client uses UTF-8 encoding and truncates messages to 1024 bytes (the same buffer size the
+  server uses). If a line is longer than 1024 bytes (in UTF-8) the client will warn and send the
+  truncated payload.
+- The client prints a short startup message showing its target and an instructive prompt.
+
 
 ## Next steps (optional)
 
