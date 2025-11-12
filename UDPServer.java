@@ -18,17 +18,11 @@ public class UDPServer {
         byte[] buf = new byte[10];
         try (DatagramSocket socket = new DatagramSocket(port)) {
             System.out.println("Listening on " + port);
-            System.out.println("Buffer size: " + buf.length + " bytes");
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 
                 int len = packet.getLength();
-                // analyze what happens with oversized messages
-                if (len >= buf.length) {
-                    System.out.println("WARNING: Message truncated (received " + len + " bytes, buffer " + buf.length + ")");
-                }
-                
                 String msg = new String(packet.getData(), 0, len, StandardCharsets.UTF_8);
                 String client = packet.getAddress().getHostAddress() + ":" + packet.getPort();
                 
