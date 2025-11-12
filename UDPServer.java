@@ -1,68 +1,36 @@
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 
 public class UDPServer {
     public static final int DEFAULT_PORT = 9876;
-    private final int port;
+    private int port;
 
-    public UDPServer(int port) {
-        this.port = port;
-    }
+    public UDPServer(int port) { this.port = port; }
+    public UDPServer() { this(DEFAULT_PORT); }
 
-    public UDPServer() {
-        this(DEFAULT_PORT);
-    }
     public void launch() {
-        final int BUFFER_SIZE = 1024;
-        byte[] buffer = new byte[BUFFER_SIZE];
-
-        try (DatagramSocket socket = new DatagramSocket(port)) {
-            System.out.println("UDPServer listening on port " + port);
-
+        byte[] buf = new byte[1024];
+        try (DatagramSocket s = new DatagramSocket(port)) {
+            System.out.println("Listening on " + port);
             while (true) {
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                socket.receive(packet);
-
-                int len = packet.getLength();
-                if (len > BUFFER_SIZE) {
-                    len = BUFFER_SIZE; // truncate if necessary (defensive)
-                }
-
-                String message = new String(packet.getData(), 0, len, StandardCharsets.UTF_8);
-                String clientAddr = packet.getAddress().getHostAddress() + ":" + packet.getPort();
-
-                System.out.println(clientAddr + " - " + message);
+                DatagramPacket p = new DatagramPacket(buf, buf.length);
+                s.receive(p);
+                int n = p.getLength();
+                if (n > buf.length) n = buf.length;
+                String msg = new String(p.getData(), 0, n, StandardCharsets.UTF_8);
+                System.out.println(p.getAddress().getHostAddress() + ":" + p.getPort() + " - " + msg);
             }
-
-        } catch (IOException e) {
-            System.err.println("UDPServer error: " + e.getMessage());
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
         }
     }
 
-    @Override
-    public String toString() {
-        return "UDPServer[port=" + port + "]";
-    }
-
-    // Allow launching the server from command line: java UDPServer 8080
     public static void main(String[] args) {
         int port = DEFAULT_PORT;
         if (args.length > 0) {
-            try {
-                port = Integer.parseInt(args[0]);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid port number: " + args[0]);
-                System.err.println("Usage: java UDPServer [port]");
-                System.exit(1);
-            }
+            try { port = Integer.parseInt(args[0]); } catch (Exception e) { }
         }
-
-        UDPServer server = new UDPServer(port);
-        System.out.println(server.toString());
-        server.launch();
+        new UDPServer(port).launch();
     }
 }
