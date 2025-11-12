@@ -1,6 +1,6 @@
 # UDP Chat
 
-UDP chat with sequence numbers, ACKs, and packet loss tracking.
+Simple UDP chat with sequence numbers and acknowledgments.
 
 ## Setup
 
@@ -23,24 +23,25 @@ Start client (Terminal 2):
 java UDPClient localhost 9876
 ```
 
-Type messages. Server shows:
-```
-[SEQ:1] 127.0.0.1:54321 - hello
-```
-
-Client shows:
+Type messages:
 ```
 hello
-message received
+>> message received
+world
+>> message received
 ```
 
-Stop client: Ctrl+D or Ctrl+Z. Shows stats.
-Stop server: Ctrl+C.
+Server shows:
+```
+[SEQ:1] 127.0.0.1:54321 - hello
+[SEQ:2] 127.0.0.1:54321 - world
+```
+
+Stop: Ctrl+C
 
 ## What it does
 
-- Sequence numbers on messages (SEQ|message format)
-- Server sends ACK back to client
-- Client tracks packet loss (2 sec timeout)
-- Detects duplicates
-- UTF-8, max 1024 bytes
+- Each message gets a sequence number (1, 2, 3, ...)
+- Client sends: SEQ|message
+- Server receives and sends ACK back
+- Client waits for ACK (2 second timeout)

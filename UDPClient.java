@@ -10,15 +10,7 @@ import java.nio.charset.StandardCharsets;
 public class UDPClient {
     private String host;
     private int port;
-    
-    // adding sequence numbers to messages
     private int seq = 0;
-    
-    // acknowledgment system
-    private int acksReceived = 0;
-    
-    // measuring packet loss
-    private int sent = 0;
 
     public UDPClient(String host, int port) {
         this.host = host;
@@ -39,30 +31,20 @@ public class UDPClient {
             String msg = seq + "|" + line;
             
             byte[] data = msg.getBytes(StandardCharsets.UTF_8);
-            if (data.length > 1024) {
-                data = java.util.Arrays.copyOf(data, 1024);
-                System.err.println("Truncated to 1024 bytes");
-            }
             
             DatagramPacket pkt = new DatagramPacket(data, data.length, addr, port);
             socket.send(pkt);
-            sent++;
             
             // acknowledgment system
             byte[] ackBuf = new byte[256];
             DatagramPacket ackPkt = new DatagramPacket(ackBuf, ackBuf.length);
             try {
                 socket.receive(ackPkt);
-                acksReceived++;
-                System.out.println(">> Message received");
+                System.out.println(">> message received");
             } catch (SocketTimeoutException e) {
-                System.err.println("No ACK for seq " + seq);
+                System.err.println("No response");
             }
         }
-        
-        // measuring packet loss
-        int lost = sent - acksReceived;
-        System.out.println("\nStats: sent=" + sent + " acks=" + acksReceived + " lost=" + lost);
         
         socket.close();
         br.close();
@@ -84,7 +66,6 @@ public class UDPClient {
         }
 
         UDPClient client = new UDPClient(host, port);
-        System.out.println("UDPClient[" + host + ":" + port + "]");
         try {
             client.run();
         } catch (IOException e) {
