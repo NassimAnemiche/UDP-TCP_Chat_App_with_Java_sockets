@@ -1,24 +1,11 @@
 # UDP-TCP_Chat_App_with_Java_sockets
 
-This repository contains a small example UDP server implemented in Java (`UDPServer.java`) and
-a placeholder `Main.java` to keep the project compiling. The UDP server listens for UTF-8 encoded
-datagrams (up to 1024 bytes) and prints received messages prefixed with the sender's address.
 
 ## Prerequisites
 
 - Java JDK 8 or later installed and available on your PATH.
 - (Optional) `nc` / `ncat` / `netcat` for sending UDP test messages from another terminal.
 
-## Compile
-
-Open PowerShell and run (from the repository root):
-
-```powershell
-cd C:\Users\nanem\UDP-TCP_Chat_App_with_Java_sockets
-javac UDPServer.java UDPClient.java Main.java
-```
-
-This produces `.class` files that you can run with the `java` command.
 
 ## Run the server
 
@@ -47,7 +34,7 @@ To stop the server, press Ctrl+C in the terminal where it is running.
 
 ## Testing with netcat / ncat
 
-From another terminal (can be the same machine) send a UDP datagram to the server. Examples:
+From another terminal send a UDP datagram to the server. Examples:
 
 - Linux / macOS (netcat with `-u`):
 
@@ -76,11 +63,7 @@ Notes:
 
 ## UDPClient
 
-A simple `UDPClient` implementation is provided in `UDPClient.java`. It reads lines from standard
-input (UTF-8) and sends each line as a UDP datagram to the host and port you provide as
-command-line arguments.
 
-Usage (interactive):
 
 ```powershell
 java UDPClient <host> <port>
@@ -97,17 +80,3 @@ Send a single message non-interactively (piped):
 ```powershell
 "Hello from UDPClient" | java UDPClient localhost 9876
 ```
-
-Notes about the client:
-- The client uses UTF-8 encoding and truncates messages to 1024 bytes (the same buffer size the
-  server uses). If a line is longer than 1024 bytes (in UTF-8) the client will warn and send the
-  truncated payload.
-- The client prints a short startup message showing its target and an instructive prompt.
-
-
-## Next steps (optional)
-
-- Add a small UDP client class for automated testing.
-- Add a README section describing integration with a TCP chat component if you extend this example.
-
-If you want me to add a client or automated tests, tell me which you'd prefer and I'll add it.
