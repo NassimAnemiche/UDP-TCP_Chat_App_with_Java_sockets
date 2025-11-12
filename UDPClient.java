@@ -32,12 +32,6 @@ public class UDPClient {
             
             byte[] data = msg.getBytes(StandardCharsets.UTF_8);
             
-            // analyze what happens with oversized messages
-            if (data.length > 65507) {
-                System.err.println("ERROR: Message too large (" + data.length + " bytes, max 65507)");
-                continue;
-            }
-            
             DatagramPacket pkt = new DatagramPacket(data, data.length, addr, port);
             socket.send(pkt);
             
