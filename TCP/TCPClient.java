@@ -12,60 +12,61 @@ public class TCPClient {
     }
 
     public void start() {
-        while (true) {
-            try {
-                System.out.println("Attempting connection to " + host + ":" + port + "...");
+        try {
+            long start = System.nanoTime();
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(host, port), 2000);
 
-                Socket socket = new Socket();
-                socket.connect(new InetSocketAddress(host, port), 2000); // timeout 2s
-                System.out.println("Connection established.");
+            long end = System.nanoTime();
+            double ms = (end - start) / 1_000_000.0;
+            System.out.println("TCP connection established in " + ms + " ms");
 
-                BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
-                BufferedReader serverInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-                PrintWriter serverOutput = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
+            BufferedReader userInput = new BufferedReader(
+                    new InputStreamReader(System.in)
+            );
+            BufferedReader serverInput = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream())
+            );
+            PrintWriter serverOutput = new PrintWriter(
+                    new OutputStreamWriter(socket.getOutputStream()), true
+            );
 
-                String line;
+            String line;
 
-                while ((line = userInput.readLine()) != null) {
+            while ((line = userInput.readLine()) != null) {
 
-                    // ---- Input Validation ----
-                    if (line.trim().isEmpty()) {
-                        System.out.println("Empty input ignored.");
-                        continue;
-                    }
-
-                    if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
-                        System.out.println("Closing connection...");
-                        socket.close();
-                        System.out.println("Disconnected.");
-                        return;
-                    }
-
-                    // Send to server
-                    serverOutput.println(line);
-
-                    // Read server response
-                    String response = serverInput.readLine();
-                    if (response == null) break;
-
-                    System.out.println(response);
+                if (line.equalsIgnoreCase("quit")) {
+                    System.out.println("Closing connection...");
+                    socket.close();
+                    return;
                 }
 
-                socket.close();
-                System.out.println("Disconnected.");
-                return;
+                serverOutput.println(line);
 
-            } catch (IOException e) {
-                System.out.println("Connection failed. Retrying in 2 seconds...");
-                try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+                String response = serverInput.readLine();
+
+                if (response == null) {
+                    // Do NOT close the socket
+                    // Just ignore and continue reading
+                    System.out.println("(No response yet)");
+                    continue;
+                }
+
+                System.out.println(response);
             }
+
+            socket.close();
+            userInput.close();
+
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
         }
     }
 
     public static void main(String[] args) {
         if (args.length < 2) {
             System.err.println("Usage: java TCPClient <host> <port>");
-            System.exit(1);
+            return;
         }
 
         String host = args[0];
