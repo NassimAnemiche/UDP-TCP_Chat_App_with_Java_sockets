@@ -19,6 +19,7 @@ public class TCPServer {
         this.port = port;
     }
 
+    @Override
     public String toString() {
         return "TCPServer running on port " + port;
     }
@@ -28,44 +29,47 @@ public class TCPServer {
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("Server started on port " + port);
 
-            // Accept a single client (simple version)
-            Socket clientSocket = serverSocket.accept();
+            // Accept multiple clients sequentially
+            while (true) {
 
-            // --- Connection Logging ---
-            clientCounter++;
-            int clientID = clientCounter;
-            String clientIP = clientSocket.getInetAddress().getHostAddress();
-            LocalDateTime timestamp = LocalDateTime.now();
-            System.out.println("[" + timestamp + "] Client #" + clientID + " connected from " + clientIP);
+                Socket clientSocket = serverSocket.accept();
 
-            // Streams
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream())
-            );
-            PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
+                // Connection Logging
+                clientCounter++;
+                int clientID = clientCounter;
+                String clientIP = clientSocket.getInetAddress().getHostAddress();
+                LocalDateTime timestamp = LocalDateTime.now();
 
-            // --- Read multiple messages until client disconnects ---
-            String line;
-            while ((line = reader.readLine()) != null) {
+                System.out.println("[" + timestamp + "] Client #" + clientID + " connected from " + clientIP);
 
-                System.out.println("Received: " + line);
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(clientSocket.getInputStream(), "UTF-8")
+                );
+                PrintWriter writer = new PrintWriter(
+                        new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"), true
+                );
 
-                // ---- Store message in history (max 10) ----
-                messageHistory.addLast(line);
-                if (messageHistory.size() > 10) {
-                    messageHistory.removeFirst();
+                try {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        System.out.println("Received: " + line);
+
+                        // Save last 10 messages
+                        messageHistory.addLast(line);
+                        if (messageHistory.size() > 10) {
+                            messageHistory.removeFirst();
+                        }
+
+                        // Echo response
+                        writer.println("[Client#" + clientID + " - " + clientIP + "] " + line);
+                    }
+
+                } finally {
+                    // Always executed, even if the client disconnects abruptly
+                    System.out.println("Client disconnected: " + clientIP);
+                    clientSocket.close();
                 }
-
-                // Echo response
-                writer.println("[Client#" + clientID + " - " + clientIP + "] " + line);
             }
-
-            // Client disconnected
-            System.out.println("Client disconnected: " + clientIP);
-
-            // Close
-            clientSocket.close();
-            serverSocket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
