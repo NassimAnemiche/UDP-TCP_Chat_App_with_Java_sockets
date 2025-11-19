@@ -28,6 +28,7 @@ public class TCPServer {
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("Server started on port " + port);
 
+            // Accept a single client (simple version)
             Socket clientSocket = serverSocket.accept();
 
             // --- Connection Logging ---
@@ -43,18 +44,24 @@ public class TCPServer {
             );
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            // Read a message
-            String line = reader.readLine();
-            System.out.println("Received: " + line);
+            // --- Read multiple messages until client disconnects ---
+            String line;
+            while ((line = reader.readLine()) != null) {
 
-            // ---- Store message in history (max 10) ----
-            messageHistory.addLast(line);
-            if (messageHistory.size() > 10) {
-                messageHistory.removeFirst();
+                System.out.println("Received: " + line);
+
+                // ---- Store message in history (max 10) ----
+                messageHistory.addLast(line);
+                if (messageHistory.size() > 10) {
+                    messageHistory.removeFirst();
+                }
+
+                // Echo response
+                writer.println("[Client#" + clientID + " - " + clientIP + "] " + line);
             }
 
-            // Echo response
-            writer.println("[Client#" + clientID + " - " + clientIP + "] " + line);
+            // Client disconnected
+            System.out.println("Client disconnected: " + clientIP);
 
             // Close
             clientSocket.close();
