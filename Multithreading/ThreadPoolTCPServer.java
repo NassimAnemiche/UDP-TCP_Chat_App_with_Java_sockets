@@ -15,12 +15,12 @@ public class ThreadPoolTCPServer {
     private ServerSocket serverSocket;
 
     private void printThreadStats() {
-    Runtime runtime = Runtime.getRuntime();
-    System.out.println("=== Thread Statistics ===");
-    System.out.println(" Active threads : " + (Thread.activeCount() - 1));
-    System.out.println(" Memory usage : " +
-            (runtime.totalMemory() - runtime.freeMemory()) / 1024 + " KB");
-}
+        Runtime runtime = Runtime.getRuntime();
+        System.out.println("=== Thread Statistics ===");
+        System.out.println(" Active threads : " + (Thread.activeCount() - 1));
+        System.out.println(" Memory usage : " +
+                (runtime.totalMemory() - runtime.freeMemory()) / 1024 + " KB");
+    }
 
     public ThreadPoolTCPServer(int port) {
         this.port = port;
@@ -43,8 +43,10 @@ public class ThreadPoolTCPServer {
                         handler.run();
                     });
 
+                    printThreadStats();
+
                 } catch (IOException e) {
-                    if (running == false) {
+                    if (!running) {
                         System.out.println("Server stopped accepting connections");
                     } else {
                         System.err.println("Accept error: " + e.getMessage());
@@ -89,9 +91,7 @@ public class ThreadPoolTCPServer {
 
         ThreadPoolTCPServer server = new ThreadPoolTCPServer(port);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            server.shutdown();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
 
         server.launch();
     }
