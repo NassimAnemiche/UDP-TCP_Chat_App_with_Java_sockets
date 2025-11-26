@@ -31,6 +31,12 @@ public class TCPClient {
                     new OutputStreamWriter(socket.getOutputStream()), true
             );
 
+            // ✅ READ WELCOME MESSAGE IMMEDIATELY
+            String welcome = serverInput.readLine();
+            if (welcome != null) {
+                System.out.println(welcome);
+            }
+
             String line;
 
             while ((line = userInput.readLine()) != null) {
@@ -46,8 +52,6 @@ public class TCPClient {
                 String response = serverInput.readLine();
 
                 if (response == null) {
-                    // Do NOT close the socket
-                    // Just ignore and continue reading
                     System.out.println("(No response yet)");
                     continue;
                 }

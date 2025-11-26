@@ -9,12 +9,10 @@ public class ConnectionThread extends Thread {
     private BufferedReader reader;
     private PrintWriter writer;
 
-    // Constructor
     public ConnectionThread(Socket clientSocket, int clientId) {
         this.clientSocket = clientSocket;
         this.clientId = clientId;
 
-        // Set meaningful thread name for debugging
         this.setName("ClientHandler-" + clientId);
     }
 
@@ -23,33 +21,36 @@ public class ConnectionThread extends Thread {
 
         String clientIP = clientSocket.getInetAddress().getHostAddress();
 
-        // EXACT expected format
         System.out.println("Client " + clientId + " connected from " + clientIP);
 
         try {
-            // Set up input / output streams
-            reader = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream())
-            );
+
             writer = new PrintWriter(
                     new OutputStreamWriter(clientSocket.getOutputStream()), true
             );
 
-            // EXACT expected welcome message
+            // ✅ Send welcome message IMMEDIATELY
             writer.println("Welcome! You are client #" + clientId);
+            writer.flush();
+
+            // ✅ Setup reader AFTER sending welcome
+            reader = new BufferedReader(
+                    new InputStreamReader(clientSocket.getInputStream())
+            );
 
             String line;
 
-            // Echo loop
             while ((line = reader.readLine()) != null) {
 
                 if (line.equalsIgnoreCase("quit")) {
                     writer.println("Goodbye client #" + clientId);
+                    writer.flush();
                     break;
                 }
 
                 System.out.println("[Client " + clientId + "] " + line);
                 writer.println("[Client " + clientId + "] " + line);
+                writer.flush();
             }
 
         } catch (IOException e) {
