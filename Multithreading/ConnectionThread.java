@@ -1,6 +1,5 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.Date;
 
 public class ConnectionThread extends Thread {
 
@@ -43,8 +42,7 @@ public class ConnectionThread extends Thread {
             while ((line = reader.readLine()) != null) {
 
                 if (line.equalsIgnoreCase("quit")) {
-                    writer.println("Goodbye client #" + clientId);
-                    writer.flush();
+                    System.out.println("Client " + clientId + " requested quit");
                     break;
                 }
 

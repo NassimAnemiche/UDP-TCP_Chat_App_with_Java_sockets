@@ -42,12 +42,14 @@ public class TCPClient {
             while ((line = userInput.readLine()) != null) {
 
                 if (line.equalsIgnoreCase("quit")) {
+                    serverOutput.println("quit");
+                    serverOutput.flush();
                     System.out.println("Closing connection...");
-                    socket.close();
-                    return;
+                    break;
                 }
 
                 serverOutput.println(line);
+                serverOutput.flush();
 
                 String response = serverInput.readLine();
 
