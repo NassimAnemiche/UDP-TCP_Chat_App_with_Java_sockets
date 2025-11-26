@@ -21,7 +21,10 @@ public class ConnectionThread extends Thread {
     @Override
     public void run() {
 
-        System.out.println("[" + new Date() + "] Client " + clientId + " connected");
+        String clientIP = clientSocket.getInetAddress().getHostAddress();
+
+        // EXACT expected format
+        System.out.println("Client " + clientId + " connected from " + clientIP);
 
         try {
             // Set up input / output streams
@@ -32,16 +35,16 @@ public class ConnectionThread extends Thread {
                     new OutputStreamWriter(clientSocket.getOutputStream()), true
             );
 
-            // Send welcome message
-            writer.println("Welcome! You are Client " + clientId);
+            // EXACT expected welcome message
+            writer.println("Welcome! You are client #" + clientId);
 
             String line;
 
-            // Echo loop from Session 3 + quit handling
+            // Echo loop
             while ((line = reader.readLine()) != null) {
 
                 if (line.equalsIgnoreCase("quit")) {
-                    writer.println("Goodbye Client " + clientId);
+                    writer.println("Goodbye client #" + clientId);
                     break;
                 }
 
@@ -62,7 +65,7 @@ public class ConnectionThread extends Thread {
             if (reader != null) reader.close();
             if (writer != null) writer.close();
             if (clientSocket != null) clientSocket.close();
-            System.out.println("[" + new Date() + "] Client " + clientId + " disconnected");
+            System.out.println("Client " + clientId + " disconnected");
         } catch (IOException e) {
             System.err.println("Cleanup failed for client " + clientId);
         }
