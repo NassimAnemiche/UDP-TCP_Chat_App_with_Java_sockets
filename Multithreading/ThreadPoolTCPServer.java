@@ -14,6 +14,14 @@ public class ThreadPoolTCPServer {
     private volatile boolean running = true;
     private ServerSocket serverSocket;
 
+    private void printThreadStats() {
+    Runtime runtime = Runtime.getRuntime();
+    System.out.println("=== Thread Statistics ===");
+    System.out.println(" Active threads : " + (Thread.activeCount() - 1));
+    System.out.println(" Memory usage : " +
+            (runtime.totalMemory() - runtime.freeMemory()) / 1024 + " KB");
+}
+
     public ThreadPoolTCPServer(int port) {
         this.port = port;
         this.threadPool = Executors.newFixedThreadPool(10);
