@@ -18,24 +18,33 @@ public class UDPClient {
     }
 
     public void run() throws IOException {
+
+        long start = System.nanoTime();   // Timer start
         DatagramSocket socket = new DatagramSocket();
+        long end = System.nanoTime();     // Timer end
+        double ms = (end - start) / 1_000_000.0;
+
+        System.out.println("UDP socket created in " + ms + " ms");
+
         socket.setSoTimeout(2000);
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(System.in, StandardCharsets.UTF_8)
+        );
         InetAddress addr = InetAddress.getByName(host);
 
-        System.out.println("Connected to " + host + ":" + port);
+        System.out.println("Ready to send UDP messages to " + host + ":" + port);
+
         String line;
         while ((line = br.readLine()) != null) {
-            // adding sequence numbers to messages
+
             seq++;
             String msg = seq + "|" + line;
-            
+
             byte[] data = msg.getBytes(StandardCharsets.UTF_8);
-            
+
             DatagramPacket pkt = new DatagramPacket(data, data.length, addr, port);
             socket.send(pkt);
-            
-            // acknowledgment system
+
             byte[] ackBuf = new byte[256];
             DatagramPacket ackPkt = new DatagramPacket(ackBuf, ackBuf.length);
             try {
@@ -45,7 +54,7 @@ public class UDPClient {
                 System.err.println("No response");
             }
         }
-        
+
         socket.close();
         br.close();
     }
@@ -53,21 +62,14 @@ public class UDPClient {
     public static void main(String[] args) {
         if (args.length < 2) {
             System.err.println("Usage: java UDPClient <host> <port>");
-            System.exit(1);
+            return;
         }
 
         String host = args[0];
-        int port = 0;
-        try {
-            port = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid port: " + args[1]);
-            System.exit(1);
-        }
+        int port = Integer.parseInt(args[1]);
 
-        UDPClient client = new UDPClient(host, port);
         try {
-            client.run();
+            new UDPClient(host, port).run();
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
