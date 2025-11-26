@@ -35,6 +35,7 @@ public class TCPClient {
             String welcome = serverInput.readLine();
             if (welcome != null) {
                 System.out.println(welcome);
+                System.out.flush();
             }
 
             String line;
